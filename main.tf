@@ -7,7 +7,7 @@
 }
 
 provider "aws" {
-  region = "eu-central-1"
+  region = var.aws_region
 }
 
 data "aws_vpc" "default" {
@@ -95,7 +95,7 @@ resource "aws_s3_bucket_public_access_block" "product_images" {
 }
 
 resource "aws_s3_bucket_policy" "product_images_public" {
-  bucket = aws_s3_bucket.product_images.id
+  bucket     = aws_s3_bucket.product_images.id
   depends_on = [aws_s3_bucket_public_access_block.product_images]
 
   policy = jsonencode({
@@ -151,8 +151,8 @@ resource "aws_dynamodb_table" "orders" {
 
 resource "aws_launch_template" "app" {
   name_prefix   = "flask-app-"
-  image_id      = "ami-0669b163befffbdfc"
-  instance_type = "t3.micro"
+  image_id      = var.ami_id
+  instance_type = var.instance_type
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
 
@@ -164,7 +164,7 @@ resource "aws_launch_template" "app" {
     #!/bin/bash
     dnf install -y python3-pip git
     cd /home/ec2-user
-    git clone https://github.com/Ashwin-Shrestha/cloud-project.git app
+    git clone ${var.github_repo_url} app
     cd app/webapp
     pip3 install -r requirements.txt
     python3 app.py &
@@ -213,9 +213,9 @@ resource "aws_lb_listener" "app_listener" {
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  desired_capacity    = 3
-  min_size            = 1
-  max_size            = 4
+  desired_capacity    = var.desired_capacity
+  min_size            = var.min_size
+  max_size            = var.max_size
   vpc_zone_identifier = data.aws_subnets.default.ids
   target_group_arns   = [aws_lb_target_group.app_tg.arn]
 
@@ -321,7 +321,7 @@ resource "aws_cloudwatch_dashboard" "main" {
 resource "aws_cloudwatch_metric_alarm" "high_response_time" {
   alarm_name          = "cloudcart-high-response-time"
   comparison_operator = "GreaterThanThreshold"
-  evaluation_periods   = 2
+  evaluation_periods  = 2
   metric_name         = "TargetResponseTime"
   namespace           = "AWS/ApplicationELB"
   period              = 60
