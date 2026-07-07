@@ -1,0 +1,14 @@
+﻿{% extends "base.html" %}
+{% block title %}{{ product.name }} - CloudCart{% endblock %}
+{% block content %}
+<a href="/" style="color:#64748b; text-decoration:none; font-size:14px;">← Back to shop</a>
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:40px; margin-top:20px; align-items:start;">
+    <img src="{{ product.img }}" style="width:100%; border-radius:12px;">
+    <div>
+        <h1>{{ product.name }}</h1>
+        <div style="color:#38bdf8; font-size:28px; font-weight:700; margin:12px 0;">${{ "%.2f"|format(product.price) }}</div>
+        <p style="color:#475569; line-height:1.6; margin-bottom:24px;">{{ product.desc }}</p>
+        <a href="/add-to-cart/{{ product.id }}" style="background:#0f172a; color:white; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:600; display:inline-block;">Add to Cart</a>
+    </div>
+</div>
+{% endblock %}

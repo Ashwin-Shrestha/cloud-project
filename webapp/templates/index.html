@@ -1,0 +1,19 @@
+﻿{% extends "base.html" %}
+{% block title %}CloudCart - Shop{% endblock %}
+{% block content %}
+<h1 style="margin-bottom:6px;">Featured Products</h1>
+<p style="color:#64748b; margin-bottom:30px;">Auto-scaled, load-balanced, deployed via CI/CD.</p>
+<div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:24px;">
+{% for p in products %}
+    <a href="/product/{{ p.id }}" style="text-decoration:none; color:inherit;">
+        <div style="background:white; border-radius:12px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,0.08); transition:transform 0.15s;">
+            <img src="{{ p.img }}" style="width:100%; height:160px; object-fit:cover;">
+            <div style="padding:16px;">
+                <div style="font-weight:600; margin-bottom:6px;">{{ p.name }}</div>
+                <div style="color:#38bdf8; font-weight:700;">${{ "%.2f"|format(p.price) }}</div>
+            </div>
+        </div>
+    </a>
+{% endfor %}
+</div>
+{% endblock %}

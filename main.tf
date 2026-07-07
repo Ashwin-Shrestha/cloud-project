@@ -163,6 +163,7 @@ resource "aws_launch_template" "app" {
   EOF
   )
 
+
   tag_specifications {
     resource_type = "instance"
     tags = {
