@@ -245,6 +245,95 @@ resource "aws_autoscaling_policy" "request_count_scaling" {
   }
 }
 
+resource "aws_cloudwatch_dashboard" "main" {
+  dashboard_name = "cloudcart-dashboard"
+
+  dashboard_body = jsonencode({
+    widgets = [
+      {
+        type   = "metric"
+        x      = 0
+        y      = 0
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/ApplicationELB", "RequestCount", "LoadBalancer", aws_lb.app_alb.arn_suffix]
+          ]
+          period = 60
+          stat   = "Sum"
+          region = "eu-central-1"
+          title  = "ALB Request Count"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 0
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/EC2", "CPUUtilization", "AutoScalingGroupName", aws_autoscaling_group.app_asg.name]
+          ]
+          period = 60
+          stat   = "Average"
+          region = "eu-central-1"
+          title  = "Average CPU Utilization"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 0
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/ApplicationELB", "TargetResponseTime", "LoadBalancer", aws_lb.app_alb.arn_suffix]
+          ]
+          period = 60
+          stat   = "Average"
+          region = "eu-central-1"
+          title  = "Average Response Time"
+        }
+      },
+      {
+        type   = "metric"
+        x      = 12
+        y      = 6
+        width  = 12
+        height = 6
+        properties = {
+          metrics = [
+            ["AWS/AutoScaling", "GroupInServiceInstances", "AutoScalingGroupName", aws_autoscaling_group.app_asg.name]
+          ]
+          period = 60
+          stat   = "Average"
+          region = "eu-central-1"
+          title  = "In-Service Instance Count"
+        }
+      }
+    ]
+  })
+}
+
+resource "aws_cloudwatch_metric_alarm" "high_response_time" {
+  alarm_name          = "cloudcart-high-response-time"
+  comparison_operator = "GreaterThanThreshold"
+  evaluation_periods   = 2
+  metric_name         = "TargetResponseTime"
+  namespace           = "AWS/ApplicationELB"
+  period              = 60
+  statistic           = "Average"
+  threshold           = 1.0
+  alarm_description   = "Alarm when average response time exceeds 1 second"
+
+  dimensions = {
+    LoadBalancer = aws_lb.app_alb.arn_suffix
+  }
+}
+
 output "alb_url" {
   value = "http://${aws_lb.app_alb.dns_name}"
 }
