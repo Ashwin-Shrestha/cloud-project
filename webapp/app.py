@@ -1,5 +1,8 @@
 ﻿from flask import Flask, render_template, request, redirect, session, url_for
 import requests
+import boto3
+import uuid
+import datetime
 
 app = Flask(__name__)
 app.secret_key = "cloudcart-demo-secret"
@@ -52,8 +55,26 @@ def remove_from_cart(product_id):
 
 @app.route("/checkout", methods=["POST"])
 def checkout():
+    cart_ids = session.get("cart", [])
+    cart_items = [p for p in PRODUCTS if p["id"] in cart_ids]
+    total = sum(p["price"] for p in cart_items)
+
+    order_id = str(uuid.uuid4())
+    try:
+        table = boto3.resource("dynamodb", region_name="eu-central-1").Table("cloudcart-orders")
+        table.put_item(Item={
+            "order_id": order_id,
+            "items": [p["name"] for p in cart_items],
+            "total": str(total),
+            "timestamp": datetime.datetime.utcnow().isoformat(),
+            "instance_id": get_instance_id()
+        })
+        db_status = "saved"
+    except Exception as e:
+        db_status = f"error: {str(e)}"
+
     session["cart"] = []
-    return render_template("checkout.html", instance_id=get_instance_id())
+    return render_template("checkout.html", instance_id=get_instance_id(), order_id=order_id, db_status=db_status)
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=80)

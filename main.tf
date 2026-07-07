@@ -66,12 +66,70 @@ resource "aws_security_group" "ec2_sg" {
   }
 }
 
+resource "aws_iam_role" "ec2_role" {
+  name = "cloudcart-ec2-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy" "dynamodb_access" {
+  name = "dynamodb-access"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:PutItem",
+        "dynamodb:GetItem",
+        "dynamodb:Scan",
+        "dynamodb:Query"
+      ]
+      Resource = aws_dynamodb_table.orders.arn
+    }]
+  })
+}
+
+resource "aws_iam_instance_profile" "ec2_profile" {
+  name = "cloudcart-ec2-profile"
+  role = aws_iam_role.ec2_role.name
+}
+
+resource "aws_dynamodb_table" "orders" {
+  name         = "cloudcart-orders"
+  billing_mode = "PAY_PER_REQUEST"
+  hash_key     = "order_id"
+
+  attribute {
+    name = "order_id"
+    type = "S"
+  }
+
+  tags = {
+    Name = "cloudcart-orders"
+  }
+}
+
 resource "aws_launch_template" "app" {
   name_prefix   = "flask-app-"
   image_id      = "ami-0669b163befffbdfc"
   instance_type = "t3.micro"
 
   vpc_security_group_ids = [aws_security_group.ec2_sg.id]
+
+  iam_instance_profile {
+    name = aws_iam_instance_profile.ec2_profile.name
+  }
 
   user_data = base64encode(<<-EOF
     #!/bin/bash
@@ -157,6 +215,7 @@ resource "aws_autoscaling_policy" "request_count_scaling" {
     target_value = 30.0
   }
 }
+
 output "alb_url" {
   value = "http://${aws_lb.app_alb.dns_name}"
 }

@@ -5,6 +5,12 @@
     <div style="font-size:60px; margin-bottom:16px;">✅</div>
     <h1>Order Placed Successfully!</h1>
     <p style="color:#64748b; margin-top:12px;">Thank you for your purchase. This is a demo checkout — no real payment was processed.</p>
+    <div style="background:white; border-radius:10px; padding:20px; margin-top:30px; max-width:400px; margin-left:auto; margin-right:auto; text-align:left; box-shadow:0 1px 4px rgba(0,0,0,0.08);">
+        <div style="font-size:13px; color:#64748b;">Order ID</div>
+        <div style="font-family:monospace; margin-bottom:12px;">{{ order_id }}</div>
+        <div style="font-size:13px; color:#64748b;">Database Status</div>
+        <div style="font-family:monospace; color:{{ 'green' if db_status == 'saved' else 'red' }};">{{ db_status }}</div>
+    </div>
     <a href="/" style="display:inline-block; margin-top:30px; background:#0f172a; color:white; padding:14px 28px; border-radius:8px; text-decoration:none; font-weight:600;">Continue Shopping</a>
 </div>
 {% endblock %}
