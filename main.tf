@@ -487,7 +487,29 @@ resource "aws_ssm_parameter" "aws_region_param" {
   type  = "String"
   value = var.aws_region
 }
+resource "aws_sqs_queue" "order_notifications" {
+  name                      = "cloudcart-order-notifications"
+  message_retention_seconds = 86400
+}
 
+resource "aws_iam_role_policy" "sqs_access" {
+  name = "sqs-access"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "sqs:SendMessage",
+        "sqs:ReceiveMessage",
+        "sqs:DeleteMessage",
+        "sqs:GetQueueAttributes"
+      ]
+      Resource = aws_sqs_queue.order_notifications.arn
+    }]
+  })
+}
 output "alb_url" {
   value = "http://${aws_lb.app_alb.dns_name}"
 }
