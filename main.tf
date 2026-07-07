@@ -136,7 +136,22 @@ resource "aws_iam_role_policy" "dynamodb_access" {
     }]
   })
 }
+resource "aws_iam_role_policy" "xray_access" {
+  name = "xray-access"
+  role = aws_iam_role.ec2_role.id
 
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "xray:PutTraceSegments",
+        "xray:PutTelemetryRecords"
+      ]
+      Resource = "*"
+    }]
+  })
+}
 resource "aws_iam_role_policy" "ssm_access" {
   name = "ssm-parameter-access"
   role = aws_iam_role.ec2_role.id
