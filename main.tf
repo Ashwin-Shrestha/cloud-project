@@ -143,9 +143,11 @@ resource "aws_iam_instance_profile" "ec2_profile" {
 }
 
 resource "aws_dynamodb_table" "orders" {
-  name         = "cloudcart-orders"
-  billing_mode = "PAY_PER_REQUEST"
-  hash_key     = "order_id"
+  name             = "cloudcart-orders"
+  billing_mode     = "PAY_PER_REQUEST"
+  hash_key         = "order_id"
+  stream_enabled   = true
+  stream_view_type = "NEW_IMAGE"
 
   attribute {
     name = "order_id"
@@ -156,6 +158,61 @@ resource "aws_dynamodb_table" "orders" {
     Name = "cloudcart-orders"
   }
 }
+
+resource "aws_iam_role" "lambda_role" {
+  name = "cloudcart-lambda-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  role       = aws_iam_role.lambda_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
+resource "aws_iam_role_policy" "lambda_dynamodb_stream" {
+  name = "lambda-dynamodb-stream-access"
+  role = aws_iam_role.lambda_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "dynamodb:GetRecords",
+        "dynamodb:GetShardIterator",
+        "dynamodb:DescribeStream",
+        "dynamodb:ListStreams"
+      ]
+      Resource = aws_dynamodb_table.orders.stream_arn
+    }]
+  })
+}
+
+resource "aws_lambda_function" "order_confirmation" {
+  function_name = "cloudcart-order-confirmation"
+  role          = aws_iam_role.lambda_role.arn
+  handler       = "index.handler"
+  runtime       = "python3.12"
+  filename      = "lambda_function.zip"
+  source_code_hash = filebase64sha256("lambda_function.zip")
+}
+
+resource "aws_lambda_event_source_mapping" "orders_stream_trigger" {
+  event_source_arn  = aws_dynamodb_table.orders.stream_arn
+  function_name     = aws_lambda_function.order_confirmation.arn
+  starting_position = "LATEST"
+}
+
 
 resource "aws_launch_template" "app" {
   name_prefix   = "flask-app-"
