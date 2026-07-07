@@ -1,3 +1,13 @@
+
+terraform {
+  backend "s3" {
+    bucket = "ashwin-cloud-project-tfstate"
+    key    = "terraform.tfstate"
+    region = "eu-central-1"
+  }
+}
+
+
 provider "aws" {
   region = "eu-central-1"
 }
