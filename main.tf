@@ -126,7 +126,7 @@ resource "aws_lb_listener" "app_listener" {
 }
 
 resource "aws_autoscaling_group" "app_asg" {
-  desired_capacity    = 2
+  desired_capacity    = 3
   min_size            = 1
   max_size            = 4
   vpc_zone_identifier = data.aws_subnets.default.ids
