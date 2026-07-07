@@ -144,19 +144,19 @@ resource "aws_autoscaling_group" "app_asg" {
   }
 }
 
-resource "aws_autoscaling_policy" "cpu_scaling" {
-  name                   = "cpu-target-tracking"
+resource "aws_autoscaling_policy" "request_count_scaling" {
+  name                   = "request-count-target-tracking"
   autoscaling_group_name = aws_autoscaling_group.app_asg.name
   policy_type            = "TargetTrackingScaling"
 
   target_tracking_configuration {
     predefined_metric_specification {
-      predefined_metric_type = "ASGAverageCPUUtilization"
+      predefined_metric_type = "ALBRequestCountPerTarget"
+      resource_label         = "${aws_lb.app_alb.arn_suffix}/${aws_lb_target_group.app_tg.arn_suffix}"
     }
-    target_value = 50.0
+    target_value = 30.0
   }
 }
-
 output "alb_url" {
   value = "http://${aws_lb.app_alb.dns_name}"
 }
