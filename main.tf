@@ -85,6 +85,14 @@ resource "aws_s3_bucket" "product_images" {
   bucket = "ashwin-cloudcart-images"
 }
 
+resource "aws_s3_bucket_versioning" "product_images_versioning" {
+  bucket = aws_s3_bucket.product_images.id
+
+  versioning_configuration {
+    status = "Enabled"
+  }
+}
+
 resource "aws_s3_bucket_public_access_block" "product_images" {
   bucket = aws_s3_bucket.product_images.id
 
@@ -355,6 +363,22 @@ resource "aws_autoscaling_notification" "asg_notifications" {
   ]
 
   topic_arn = aws_sns_topic.scaling_alerts.arn
+}
+
+resource "aws_budgets_budget" "monthly_threshold" {
+  name         = "cloudcart-monthly-threshold"
+  budget_type  = "COST"
+  limit_amount = "5"
+  limit_unit   = "USD"
+  time_unit    = "MONTHLY"
+
+  notification {
+    comparison_operator        = "GREATER_THAN"
+    threshold                  = 80
+    threshold_type             = "PERCENTAGE"
+    notification_type          = "ACTUAL"
+    subscriber_email_addresses = ["eshwingg@gmail.com"]
+  }
 }
 
 output "alb_url" {
