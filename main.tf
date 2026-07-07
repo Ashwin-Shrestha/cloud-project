@@ -81,6 +81,35 @@ resource "aws_iam_role" "ec2_role" {
   })
 }
 
+resource "aws_s3_bucket" "product_images" {
+  bucket = "ashwin-cloudcart-images"
+}
+
+resource "aws_s3_bucket_public_access_block" "product_images" {
+  bucket = aws_s3_bucket.product_images.id
+
+  block_public_acls       = false
+  block_public_policy     = false
+  ignore_public_acls      = false
+  restrict_public_buckets = false
+}
+
+resource "aws_s3_bucket_policy" "product_images_public" {
+  bucket = aws_s3_bucket.product_images.id
+  depends_on = [aws_s3_bucket_public_access_block.product_images]
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Sid       = "PublicReadGetObject"
+      Effect    = "Allow"
+      Principal = "*"
+      Action    = "s3:GetObject"
+      Resource  = "${aws_s3_bucket.product_images.arn}/*"
+    }]
+  })
+}
+
 resource "aws_iam_role_policy" "dynamodb_access" {
   name = "dynamodb-access"
   role = aws_iam_role.ec2_role.id

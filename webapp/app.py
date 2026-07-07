@@ -8,12 +8,12 @@ app = Flask(__name__)
 app.secret_key = "cloudcart-demo-secret"
 
 PRODUCTS = [
-    {"id": 1, "name": "Wireless Headphones", "price": 79.99, "img": "https://picsum.photos/seed/headphones/400/300", "desc": "Noise-cancelling over-ear headphones with 30hr battery life."},
-    {"id": 2, "name": "Smart Watch", "price": 149.99, "img": "https://picsum.photos/seed/watch/400/300", "desc": "Fitness tracking, heart rate monitor, 7-day battery."},
-    {"id": 3, "name": "Mechanical Keyboard", "price": 99.99, "img": "https://picsum.photos/seed/keyboard/400/300", "desc": "RGB backlit mechanical keyboard with hot-swappable switches."},
-    {"id": 4, "name": "Portable Speaker", "price": 59.99, "img": "https://picsum.photos/seed/speaker/400/300", "desc": "Waterproof Bluetooth speaker with 20hr playtime."},
-    {"id": 5, "name": "Laptop Stand", "price": 34.99, "img": "https://picsum.photos/seed/standx/400/300", "desc": "Adjustable aluminum laptop stand for ergonomic setup."},
-    {"id": 6, "name": "USB-C Hub", "price": 44.99, "img": "https://picsum.photos/seed/hub/400/300", "desc": "7-in-1 USB-C hub with HDMI, SD card reader, and fast charging."},
+    {"id": 1, "name": "Wireless Headphones", "price": 79.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/headphones.jpg", "desc": "Noise-cancelling over-ear headphones with 30hr battery life."},
+    {"id": 2, "name": "Smart Watch", "price": 149.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/watch.jpg", "desc": "Fitness tracking, heart rate monitor, 7-day battery."},
+    {"id": 3, "name": "Mechanical Keyboard", "price": 99.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/keyboard.jpg", "desc": "RGB backlit mechanical keyboard with hot-swappable switches."},
+    {"id": 4, "name": "Portable Speaker", "price": 59.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/speaker.jpg", "desc": "Waterproof Bluetooth speaker with 20hr playtime."},
+    {"id": 5, "name": "Laptop Stand", "price": 34.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/standx.jpg", "desc": "Adjustable aluminum laptop stand for ergonomic setup."},
+    {"id": 6, "name": "USB-C Hub", "price": 44.99, "img": "https://ashwin-cloudcart-images.s3.eu-central-1.amazonaws.com/hub.jpg", "desc": "7-in-1 USB-C hub with HDMI, SD card reader, and fast charging."},
 ]
 
 def get_instance_id():
