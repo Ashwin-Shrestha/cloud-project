@@ -137,6 +137,23 @@ resource "aws_iam_role_policy" "dynamodb_access" {
   })
 }
 
+resource "aws_iam_role_policy" "ssm_access" {
+  name = "ssm-parameter-access"
+  role = aws_iam_role.ec2_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "ssm:GetParameter",
+        "ssm:GetParameters"
+      ]
+      Resource = "arn:aws:ssm:eu-central-1:012438021415:parameter/cloudcart/*"
+    }]
+  })
+}
+
 resource "aws_iam_instance_profile" "ec2_profile" {
   name = "cloudcart-ec2-profile"
   role = aws_iam_role.ec2_role.name
@@ -436,6 +453,24 @@ resource "aws_budgets_budget" "monthly_threshold" {
     notification_type          = "ACTUAL"
     subscriber_email_addresses = ["eshwingg@gmail.com"]
   }
+}
+
+resource "aws_ssm_parameter" "dynamodb_table_name" {
+  name  = "/cloudcart/dynamodb_table_name"
+  type  = "String"
+  value = aws_dynamodb_table.orders.name
+}
+
+resource "aws_ssm_parameter" "s3_bucket_name" {
+  name  = "/cloudcart/s3_bucket_name"
+  type  = "String"
+  value = aws_s3_bucket.product_images.id
+}
+
+resource "aws_ssm_parameter" "aws_region_param" {
+  name  = "/cloudcart/aws_region"
+  type  = "String"
+  value = var.aws_region
 }
 
 output "alb_url" {
