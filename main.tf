@@ -334,6 +334,29 @@ resource "aws_cloudwatch_metric_alarm" "high_response_time" {
   }
 }
 
+resource "aws_sns_topic" "scaling_alerts" {
+  name = "cloudcart-scaling-alerts"
+}
+
+resource "aws_sns_topic_subscription" "email_alert" {
+  topic_arn = aws_sns_topic.scaling_alerts.arn
+  protocol  = "email"
+  endpoint  = "eshwingg@gmail.com"
+}
+
+resource "aws_autoscaling_notification" "asg_notifications" {
+  group_names = [aws_autoscaling_group.app_asg.name]
+
+  notifications = [
+    "autoscaling:EC2_INSTANCE_LAUNCH",
+    "autoscaling:EC2_INSTANCE_TERMINATE",
+    "autoscaling:EC2_INSTANCE_LAUNCH_ERROR",
+    "autoscaling:EC2_INSTANCE_TERMINATE_ERROR",
+  ]
+
+  topic_arn = aws_sns_topic.scaling_alerts.arn
+}
+
 output "alb_url" {
   value = "http://${aws_lb.app_alb.dns_name}"
 }
