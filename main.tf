@@ -316,6 +316,14 @@ resource "aws_autoscaling_group" "app_asg" {
   vpc_zone_identifier = data.aws_subnets.default.ids
   target_group_arns   = [aws_lb_target_group.app_tg.arn]
 
+  enabled_metrics = [
+    "GroupMinSize",
+    "GroupMaxSize",
+    "GroupDesiredCapacity",
+    "GroupInServiceInstances",
+    "GroupTotalInstances"
+  ]
+
   launch_template {
     id      = aws_launch_template.app.id
     version = "$Latest"
