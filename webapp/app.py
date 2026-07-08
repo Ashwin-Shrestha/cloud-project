@@ -18,7 +18,17 @@ PRODUCTS = [
 
 def get_instance_id():
     try:
-        return requests.get("http://169.254.169.254/latest/meta-data/instance-id", timeout=1).text
+        token = requests.put(
+            "http://169.254.169.254/latest/api/token",
+            headers={"X-aws-ec2-metadata-token-ttl-seconds": "21600"},
+            timeout=1
+        ).text
+        response = requests.get(
+            "http://169.254.169.254/latest/meta-data/instance-id",
+            headers={"X-aws-ec2-metadata-token": token},
+            timeout=1
+        )
+        return response.text if response.text else "local-dev"
     except Exception:
         return "local-dev"
 
